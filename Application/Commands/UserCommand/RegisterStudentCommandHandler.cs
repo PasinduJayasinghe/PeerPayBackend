@@ -1,5 +1,7 @@
-﻿using Application.Dtos;
+﻿using Application.Commands.StudentCommand;
+using Application.Dtos;
 using Application.Interfaces;
+using Domain.Classes;
 using Domain.Enums;
 using Domain.Events;
 using MediatR;
@@ -9,28 +11,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Commands.Employer
+namespace Application.Commands.UserCommand
 {
-    public class RegisterEmployerCommandHandler : IRequestHandler<RegisterEmployerCommand, UserResponseDto>
+    public class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentCommand, UserResponseDto>
     {
         private readonly IUserRepository _userRepository;
-        private readonly IEmployerRepository _employerRepository;
+        private readonly IStudentRepository _studentRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IMediator _mediator;
 
-        public RegisterEmployerCommandHandler(
+        public RegisterStudentCommandHandler(
             IUserRepository userRepository,
-            IEmployerRepository employerRepository,
+            IStudentRepository studentRepository,
             IPasswordHasher passwordHasher,
             IMediator mediator)
         {
             _userRepository = userRepository;
-            _employerRepository = employerRepository;
+            _studentRepository = studentRepository;
             _passwordHasher = passwordHasher;
             _mediator = mediator;
         }
 
-        public async Task<UserResponseDto> Handle(RegisterEmployerCommand request, CancellationToken cancellationToken)
+        public async Task<UserResponseDto> Handle(RegisterStudentCommand request, CancellationToken cancellationToken)
         {
             // Check if email already exists
             if (await _userRepository.EmailExistsAsync(request.Email))
@@ -52,7 +54,7 @@ namespace Application.Commands.Employer
                 Phone = NormalizePhoneNumber(request.Phone),
                 PasswordHash = _passwordHasher.HashPassword(request.Password),
                 Name = request.Name,
-                UserType = UserType.Employer,
+                UserType = UserType.Student,
                 Status = UserStatus.PendingVerification,
                 IsVerified = false,
                 CreatedAt = DateTime.UtcNow
@@ -61,29 +63,29 @@ namespace Application.Commands.Employer
             // Save user
             var createdUser = await _userRepository.AddAsync(user);
 
-            // Create Employer entity
-            var employer = new Employer
+            // Create Student entity
+            var student = new Student
             {
-                EmployerId = Guid.NewGuid().ToString(),
+                StudentId = Guid.NewGuid().ToString(),
                 UserId = createdUser.UserId,
-                CompanyName = request.CompanyName,
-                CompanyType = request.CompanyType,
-                Description = request.Description,
-                ContactPerson = request.ContactPerson,
-                VerificationStatus = "Pending",
+                University = request.University,
+                Course = request.Course,
+                YearOfStudy = request.YearOfStudy,
+                AcademicVerificationStatus = "Pending",
                 Rating = 0,
-                JobsPosted = 0
+                CompletedJobs = 0,
+                TotalEarnings = 0
             };
 
-            // Save employer
-            await _employerRepository.AddAsync(employer);
+            // Save student
+            await _studentRepository.AddAsync(student);
 
             // Publish domain event
             await _mediator.Publish(new UserRegisteredEvent
             {
                 UserId = createdUser.UserId,
                 Email = createdUser.Email,
-                UserType = UserType.Employer.ToString()
+                UserType = UserType.Student.ToString()
             }, cancellationToken);
 
             // Return response
@@ -102,6 +104,7 @@ namespace Application.Commands.Employer
 
         private string NormalizePhoneNumber(string phone)
         {
+            // Convert 0XXXXXXXXX to +94XXXXXXXXX
             if (phone.StartsWith("0"))
             {
                 return "+94" + phone.Substring(1);

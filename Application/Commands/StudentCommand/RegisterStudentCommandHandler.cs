@@ -1,5 +1,7 @@
-﻿using Application.Dtos;
+﻿using Application.Commands.StudentCommand;
+using Application.Dtos;
 using Application.Interfaces;
+using Domain.Classes;
 using Domain.Enums;
 using Domain.Events;
 using MediatR;
@@ -9,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Commands.Student
+namespace Application.Commands.StudentCommand
 {
     public class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentCommand, UserResponseDto>
     {

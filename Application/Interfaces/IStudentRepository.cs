@@ -12,5 +12,6 @@ namespace Application.Interfaces
         Task<Student> GetByUserIdAsync(string userId);
         Task<IEnumerable<Student>> GetByUniversityAsync(string university);
         Task<IEnumerable<Student>> SearchBySkillsAsync(string[] skills);
+        Task<Student> AddAsync(Student student);
     }
 }

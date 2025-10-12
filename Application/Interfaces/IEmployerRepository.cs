@@ -11,5 +11,6 @@ namespace Application.Interfaces
     {
         Task<Employer> GetByUserIdAsync(string userId);
         Task<IEnumerable<Employer>> GetVerifiedEmployersAsync();
+        Task<Employer> AddAsync(Employer employer);
     }
 }

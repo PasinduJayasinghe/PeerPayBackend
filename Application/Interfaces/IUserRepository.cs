@@ -14,5 +14,6 @@ namespace Application.Interfaces
         Task<bool> EmailExistsAsync(string email);
         Task<bool> PhoneExistsAsync(string phone);
         Task UpdateLastLoginAsync(string userId);
+        Task<User> AddAsync(User user);
     }
 }

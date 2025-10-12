@@ -7,24 +7,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Commands.Employer
+namespace Application.Commands.StudentCommand
 {
-    public class RegisterEmployerCommand : IRequest<UserResponseDto>
+    public class RegisterStudentCommand : IRequest<UserResponseDto>
     {
         public string Email { get; set; }
         public string Phone { get; set; }
         public string Password { get; set; }
         public string ConfirmPassword { get; set; }
         public string Name { get; set; }
-        public string CompanyName { get; set; }
-        public string CompanyType { get; set; }
-        public string Description { get; set; }
-        public string ContactPerson { get; set; }
+        public string University { get; set; }
+        public string Course { get; set; }
+        public int YearOfStudy { get; set; }
     }
 
-    public class RegisterEmployerCommandValidator : AbstractValidator<RegisterEmployerCommand>
+    public class RegisterStudentCommandValidator : AbstractValidator<RegisterStudentCommand>
     {
-        public RegisterEmployerCommandValidator()
+        public RegisterStudentCommandValidator()
         {
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("Email is required")
@@ -53,20 +52,16 @@ namespace Application.Commands.Employer
                 .NotEmpty().WithMessage("Confirm password is required")
                 .Equal(x => x.Password).WithMessage("Passwords do not match");
 
-            RuleFor(x => x.CompanyName)
-                .NotEmpty().WithMessage("Company name is required")
-                .MaximumLength(255).WithMessage("Company name cannot exceed 255 characters");
+            RuleFor(x => x.University)
+                .NotEmpty().WithMessage("University is required")
+                .MaximumLength(255).WithMessage("University name cannot exceed 255 characters");
 
-            RuleFor(x => x.CompanyType)
-                .NotEmpty().WithMessage("Company type is required")
-                .MaximumLength(100).WithMessage("Company type cannot exceed 100 characters");
+            RuleFor(x => x.Course)
+                .NotEmpty().WithMessage("Course is required")
+                .MaximumLength(255).WithMessage("Course name cannot exceed 255 characters");
 
-            RuleFor(x => x.ContactPerson)
-                .NotEmpty().WithMessage("Contact person is required")
-                .MaximumLength(200).WithMessage("Contact person name cannot exceed 200 characters");
-
-            RuleFor(x => x.Description)
-                .MaximumLength(1000).WithMessage("Description cannot exceed 1000 characters");
+            RuleFor(x => x.YearOfStudy)
+                .InclusiveBetween(1, 10).WithMessage("Year of study must be between 1 and 10");
         }
     }
 }

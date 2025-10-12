@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Commands.Login
+namespace Application.Commands.LoginCommand
 {
     public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, LoginResponseDto>
     {

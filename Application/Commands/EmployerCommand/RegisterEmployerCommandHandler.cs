@@ -1,6 +1,6 @@
-﻿using Application.Commands.Student;
-using Application.Dtos;
+﻿using Application.Dtos;
 using Application.Interfaces;
+using Domain.Classes;
 using Domain.Enums;
 using Domain.Events;
 using MediatR;
@@ -10,28 +10,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Commands.User
+namespace Application.Commands.EmployerCommand
 {
-    public class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentCommand, UserResponseDto>
+    public class RegisterEmployerCommandHandler : IRequestHandler<RegisterEmployerCommand, UserResponseDto>
     {
         private readonly IUserRepository _userRepository;
-        private readonly IStudentRepository _studentRepository;
+        private readonly IEmployerRepository _employerRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IMediator _mediator;
 
-        public RegisterStudentCommandHandler(
+        public RegisterEmployerCommandHandler(
             IUserRepository userRepository,
-            IStudentRepository studentRepository,
+            IEmployerRepository employerRepository,
             IPasswordHasher passwordHasher,
             IMediator mediator)
         {
             _userRepository = userRepository;
-            _studentRepository = studentRepository;
+            _employerRepository = employerRepository;
             _passwordHasher = passwordHasher;
             _mediator = mediator;
         }
 
-        public async Task<UserResponseDto> Handle(RegisterStudentCommand request, CancellationToken cancellationToken)
+        public async Task<UserResponseDto> Handle(RegisterEmployerCommand request, CancellationToken cancellationToken)
         {
             // Check if email already exists
             if (await _userRepository.EmailExistsAsync(request.Email))
@@ -53,7 +53,7 @@ namespace Application.Commands.User
                 Phone = NormalizePhoneNumber(request.Phone),
                 PasswordHash = _passwordHasher.HashPassword(request.Password),
                 Name = request.Name,
-                UserType = UserType.Student,
+                UserType = UserType.Employer,
                 Status = UserStatus.PendingVerification,
                 IsVerified = false,
                 CreatedAt = DateTime.UtcNow
@@ -62,29 +62,29 @@ namespace Application.Commands.User
             // Save user
             var createdUser = await _userRepository.AddAsync(user);
 
-            // Create Student entity
-            var student = new Student
+            // Create Employer entity
+            var employer = new Employer
             {
-                StudentId = Guid.NewGuid().ToString(),
+                EmployerId = Guid.NewGuid().ToString(),
                 UserId = createdUser.UserId,
-                University = request.University,
-                Course = request.Course,
-                YearOfStudy = request.YearOfStudy,
-                AcademicVerificationStatus = "Pending",
+                CompanyName = request.CompanyName,
+                CompanyType = request.CompanyType,
+                Description = request.Description,
+                ContactPerson = request.ContactPerson,
+                VerificationStatus = "Pending",
                 Rating = 0,
-                CompletedJobs = 0,
-                TotalEarnings = 0
+                JobsPosted = 0
             };
 
-            // Save student
-            await _studentRepository.AddAsync(student);
+            // Save employer
+            await _employerRepository.AddAsync(employer);
 
             // Publish domain event
             await _mediator.Publish(new UserRegisteredEvent
             {
                 UserId = createdUser.UserId,
                 Email = createdUser.Email,
-                UserType = UserType.Student.ToString()
+                UserType = UserType.Employer.ToString()
             }, cancellationToken);
 
             // Return response
@@ -103,7 +103,6 @@ namespace Application.Commands.User
 
         private string NormalizePhoneNumber(string phone)
         {
-            // Convert 0XXXXXXXXX to +94XXXXXXXXX
             if (phone.StartsWith("0"))
             {
                 return "+94" + phone.Substring(1);
