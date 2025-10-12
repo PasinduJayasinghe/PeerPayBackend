@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using DataType = Domain.Enums.DataType;
+using TransactionStatus = Domain.Enums.TransactionStatus;
 
 namespace Domain.Classes
 {
