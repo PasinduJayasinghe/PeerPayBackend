@@ -28,7 +28,7 @@ namespace Application.Commands.JobCommand
         public async Task<JobDto> Handle(CreateJobCommand request, CancellationToken cancellationToken)
         {
             // Verify employer exists
-            var employer = await _employerRepository.GetByIdAsync(request.EmployerId);
+            var employer = await _employerRepository.GetByUserIdAsync(request.EmployerId);
             if (employer == null)
             {
                 throw new Exception("Employer not found");
