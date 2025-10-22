@@ -33,6 +33,9 @@ namespace PeerPayBackend
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IMessageRepository, MessageRepository>();
             builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+            builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+            builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+            builder.Services.AddScoped<IStripeService, StripeService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
