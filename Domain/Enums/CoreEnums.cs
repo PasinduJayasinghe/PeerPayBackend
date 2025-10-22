@@ -85,7 +85,8 @@ namespace Domain.Enums
         Payment = 2,
         Message = 3,
         System = 4,
-        Reminder = 5
+        Reminder = 5,
+        JobStatus
     }
 
     public enum TransactionStatus

@@ -270,6 +270,7 @@ namespace Domain.Classes
         public string Content { get; set; }
         public NotificationType Type { get; set; }
         public bool IsRead { get; set; }
+        public DateTime CreatedAt { get; set; }
         public DateTime? ReadAt { get; set; }
         public string ActionUrl { get; set; }
         public string Metadata { get; set; }
