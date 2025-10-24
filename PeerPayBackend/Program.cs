@@ -38,6 +38,20 @@ namespace PeerPayBackend
             builder.Services.AddScoped<IStripeService, StripeService>();
 
             builder.Services.AddControllers();
+            
+            // Add CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowLocalhost",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:5173")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials();
+                    });
+            });
+            
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -52,6 +66,9 @@ namespace PeerPayBackend
             }
 
             app.UseHttpsRedirection();
+
+            // Use CORS
+            app.UseCors("AllowLocalhost");
 
             app.UseAuthorization();
 
