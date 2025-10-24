@@ -57,14 +57,14 @@ namespace Application.Commands.JobApplicationCommand
                 throw new Exception("Application not found");
             }
 
-            // Verify the employer owns the job
-            var employer = await _employerRepository.GetEmployerByIdAsync(request.UpdatedBy);
+            // Verify the user is the employer who owns the job
+            var employer = await _employerRepository.GetByUserIdAsync(request.UpdatedBy);
             if (employer == null)
             {
                 throw new Exception("Employer not found");
             }
 
-            if (application.Job.EmployerId != request.UpdatedBy)
+            if (application.Job.EmployerId != employer.EmployerId)
             {
                 throw new UnauthorizedAccessException("You are not authorized to update this application");
             }
