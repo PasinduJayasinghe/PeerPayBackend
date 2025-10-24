@@ -24,6 +24,11 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(s => s.StudentId == studentId);
         }
 
+        public async Task<Student> GetStudentByIdAsync(string studentId)
+        {
+            return await GetByIdAsync(studentId);
+        }
+
         public async Task<Student> GetByUserIdAsync(string userId)
         {
             return await _context.Students
@@ -79,6 +84,11 @@ namespace Infrastructure.Repositories
         {
             _context.Students.Update(student);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateStudentAsync(Student student)
+        {
+            await UpdateAsync(student);
         }
 
         public async Task DeleteAsync(string studentId)
