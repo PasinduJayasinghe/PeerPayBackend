@@ -80,8 +80,10 @@ namespace Infrastructure.Context
                 entity.HasKey(e => e.StudentId);
                 entity.Property(e => e.StudentId).HasMaxLength(50);
                 entity.Property(e => e.UserId).HasMaxLength(50).IsRequired();
-                entity.Property(e => e.University).HasMaxLength(255);
-                entity.Property(e => e.Course).HasMaxLength(255);
+                entity.Property(e => e.University).HasMaxLength(255).IsRequired(false);
+                entity.Property(e => e.Course).HasMaxLength(255).IsRequired(false);
+                entity.Property(e => e.AcademicVerificationStatus).IsRequired(false);
+                entity.Property(e => e.CvUrl).IsRequired(false);
                 entity.Property(e => e.Rating).HasColumnType("decimal(3,2)");
                 entity.Property(e => e.TotalEarnings).HasColumnType("decimal(18,2)");
 
@@ -433,14 +435,15 @@ namespace Infrastructure.Context
             {
                 entity.HasKey(e => e.OtpId);
                 entity.Property(e => e.OtpId).HasMaxLength(50);
-                entity.Property(e => e.UserId).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.UserId).HasMaxLength(50).IsRequired(false); // Nullable for registration OTPs
                 entity.Property(e => e.OtpCode).HasMaxLength(10).IsRequired();
                 entity.Property(e => e.ContactMethod).HasMaxLength(255);
 
                 entity.HasOne(e => e.User)
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired(false); // Nullable relationship
             });
         }
     }

@@ -57,11 +57,19 @@ namespace Application.Commands.LoginCommand
 
             return new LoginResponseDto
             {
-                UserId = user.UserId,
-                Email = user.Email,
-                Name = user.Name,
-                UserType = user.UserType,
                 Token = token,
+                User = new UserDto
+                {
+                    UserId = user.UserId,
+                    Email = user.Email,
+                    Phone = user.Phone,
+                    Name = user.Name,
+                    UserType = user.UserType,
+                    Status = user.Status,
+                    IsVerified = user.IsVerified,
+                    CreatedAt = user.CreatedAt
+                },
+                UserType = user.UserType,
                 ExpiresAt = expiresAt
             };
         }

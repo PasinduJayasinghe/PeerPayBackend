@@ -1,12 +1,36 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.Commands.StudentCommand;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace PeerPayBackend.Controllers
 {
-    public class StudentController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class StudentController : ControllerBase
     {
-        public IActionResult Index()
+        private readonly IMediator _mediator;
+
+        public StudentController(IMediator mediator)
         {
-            return View();
+            _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Register a new student
+        /// POST /api/student/register
+        /// </summary>
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterStudentCommand command)
+        {
+            try
+            {
+                var result = await _mediator.Send(command);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }
