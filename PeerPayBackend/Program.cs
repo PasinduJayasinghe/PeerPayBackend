@@ -44,6 +44,7 @@ namespace PeerPayBackend
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<IEmployerRepository, EmployerRepository>();
             builder.Services.AddScoped<IJobRepository, JobRepository>();
+            builder.Services.AddScoped<IJobCategoryRepository, JobCategoryRepository>();
             builder.Services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
             builder.Services.AddScoped<IOTPRepository, OTPRepository>();
             builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
