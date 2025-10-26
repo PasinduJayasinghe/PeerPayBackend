@@ -63,7 +63,7 @@ namespace Application.Commands.UserCommand
             if (string.IsNullOrWhiteSpace(phoneNumber))
                 return false;
 
-            // Check for +94 format
+            // Check for © 2025 PeerPay. All rights reserved.format
             if (phoneNumber.StartsWith("+94"))
             {
                 return phoneNumber.Length == 12 && phoneNumber.Substring(3).All(char.IsDigit);
