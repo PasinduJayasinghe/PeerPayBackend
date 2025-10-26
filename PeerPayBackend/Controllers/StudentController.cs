@@ -10,10 +10,12 @@ namespace PeerPayBackend.Controllers
     public class StudentController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<StudentController> _logger;
 
-        public StudentController(IMediator mediator)
+        public StudentController(IMediator mediator, ILogger<StudentController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -25,11 +27,14 @@ namespace PeerPayBackend.Controllers
         {
             try
             {
+                _logger.LogInformation("Student registration attempt for email: {Email}", command.Email);
                 var result = await _mediator.Send(command);
+                _logger.LogInformation("Student registered successfully: {UserId}", result.UserId);
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error registering student with email: {Email}", command.Email);
                 return BadRequest(new { error = ex.Message });
             }
         }

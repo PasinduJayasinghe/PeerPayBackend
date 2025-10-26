@@ -193,10 +193,16 @@ namespace Infrastructure.Context
                 entity.HasKey(e => e.JobId);
                 entity.Property(e => e.JobId).HasMaxLength(50);
                 entity.Property(e => e.EmployerId).HasMaxLength(50).IsRequired();
-                entity.Property(e => e.CategoryId).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.CategoryId).HasMaxLength(50);
                 entity.Property(e => e.Title).HasMaxLength(300).IsRequired();
                 entity.Property(e => e.PayAmount).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.Location).HasMaxLength(255);
+
+                entity.HasOne(e => e.Category)
+                    .WithMany(c => c.Jobs)
+                    .HasForeignKey(e => e.CategoryId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasMany(e => e.Applications)
                     .WithOne(a => a.Job)

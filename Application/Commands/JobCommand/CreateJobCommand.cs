@@ -35,7 +35,6 @@ namespace Application.Commands.JobCommand
                 .MaximumLength(50).WithMessage("Employer ID cannot exceed 50 characters");
 
             RuleFor(x => x.CategoryId)
-                .NotEmpty().WithMessage("Category is required")
                 .MaximumLength(50).WithMessage("Category ID cannot exceed 50 characters");
 
             RuleFor(x => x.Title)

@@ -13,10 +13,12 @@ namespace PeerPayBackend.Controllers
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IMediator mediator)
+        public UserController(IMediator mediator, ILogger<UserController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -27,11 +29,14 @@ namespace PeerPayBackend.Controllers
         {
             try
             {
+                _logger.LogInformation("Login attempt for user: {EmailOrPhone}", command.EmailOrPhone);
                 var result = await _mediator.Send(command);
+                _logger.LogInformation("User logged in successfully: {Email}", result.User.Email);
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogWarning(ex, "Login failed for user: {EmailOrPhone}", command.EmailOrPhone);
                 return BadRequest(new { error = ex.Message });
             }
         }

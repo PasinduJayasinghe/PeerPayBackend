@@ -4,6 +4,7 @@ using Application.Interfaces;
 using Domain.Classes;
 using Domain.Enums;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,21 +17,27 @@ namespace Application.Commands.JobCommand
     {
         private readonly IJobRepository _jobRepository;
         private readonly IEmployerRepository _employerRepository;
+        private readonly ILogger<CreateJobCommandHandler> _logger;
 
         public CreateJobCommandHandler(
             IJobRepository jobRepository,
-            IEmployerRepository employerRepository)
+            IEmployerRepository employerRepository,
+            ILogger<CreateJobCommandHandler> logger)
         {
             _jobRepository = jobRepository;
             _employerRepository = employerRepository;
+            _logger = logger;
         }
 
         public async Task<JobDto> Handle(CreateJobCommand request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Creating job: {Title} for employer: {EmployerId}", request.Title, request.EmployerId);
+            
             // Verify employer exists
             var employer = await _employerRepository.GetByUserIdAsync(request.EmployerId);
             if (employer == null)
             {
+                _logger.LogWarning("Job creation failed: Employer {EmployerId} not found", request.EmployerId);
                 throw new Exception("Employer not found");
             }
 
@@ -38,7 +45,7 @@ namespace Application.Commands.JobCommand
             var job = new Job
             {
                 JobId = Guid.NewGuid().ToString(),
-                EmployerId = request.EmployerId,
+                EmployerId = employer.EmployerId, // Use the actual EmployerId from the employer entity
                 CategoryId = request.CategoryId,
                 Title = request.Title,
                 Description = request.Description,

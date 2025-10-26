@@ -4,6 +4,7 @@ using Application.Dtos;
 using Application.Interfaces;
 using Domain.Classes;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,24 +20,31 @@ namespace Application.Commands.MessageCommand
         private readonly IConversationRepository _conversationRepository;
         private readonly INotificationService _notificationService;
         private readonly IUserRepository _userRepository;
+        private readonly ILogger<SendMessageCommandHandler> _logger;
 
         public SendMessageCommandHandler(
             IMessageRepository messageRepository,
             IConversationRepository conversationRepository,
             INotificationService notificationService,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            ILogger<SendMessageCommandHandler> logger)
         {
             _messageRepository = messageRepository;
             _conversationRepository = conversationRepository;
             _notificationService = notificationService;
             _userRepository = userRepository;
+            _logger = logger;
         }
 
         public async Task<MessageDto> Handle(SendMessageCommand request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Processing message from sender {SenderId} in conversation {ConversationId}", 
+                request.SenderId, request.ConversationId);
+            
             var conversation = await _conversationRepository.GetByIdAsync(request.ConversationId);
             if (conversation == null)
             {
+                _logger.LogWarning("Message failed: Conversation {ConversationId} not found", request.ConversationId);
                 throw new Exception("Conversation not found");
             }
 

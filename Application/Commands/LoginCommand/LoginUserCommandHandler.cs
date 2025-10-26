@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Domain.Enums;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,36 +16,44 @@ namespace Application.Commands.LoginCommand
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly ITokenService _tokenService;
+        private readonly ILogger<LoginUserCommandHandler> _logger;
 
         public LoginUserCommandHandler(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
-            ITokenService tokenService)
+            ITokenService tokenService,
+            ILogger<LoginUserCommandHandler> logger)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _tokenService = tokenService;
+            _logger = logger;
         }
 
         public async Task<LoginResponseDto> Handle(LoginUserCommand request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Login attempt for user: {EmailOrPhone}", request.EmailOrPhone);
+            
             // Try to find user by email or phone
             var user = await GetUserByEmailOrPhoneAsync(request.EmailOrPhone);
 
             if (user == null)
             {
+                _logger.LogWarning("Login failed: User {EmailOrPhone} not found", request.EmailOrPhone);
                 throw new Exception("Invalid credentials");
             }
 
             // Verify password
             if (!_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
             {
+                _logger.LogWarning("Login failed: Invalid password for user {UserId}", user.UserId);
                 throw new Exception("Invalid credentials");
             }
 
             // Check if user is active
             if (user.Status != UserStatus.Active && user.Status != UserStatus.PendingVerification)
             {
+                _logger.LogWarning("Login failed: Account status is {Status} for user {UserId}", user.Status, user.UserId);
                 throw new Exception($"Account is {user.Status.ToString().ToLower()}");
             }
 

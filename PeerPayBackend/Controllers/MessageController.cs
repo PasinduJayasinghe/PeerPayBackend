@@ -17,26 +17,39 @@ namespace PeerPayBackend.Controllers
     public class MessageController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<MessageController> _logger;
 
-        public MessageController(IMediator mediator)
+        public MessageController(IMediator mediator, ILogger<MessageController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         // POST: api/message
         [HttpPost]
         public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto)
         {
-            var command = new SendMessageCommand
+            try
             {
-                ConversationId = dto.ConversationId,
-                SenderId = dto.SenderId,
-                Content = dto.Content,
-                Attachments = dto.Attachments
-            };
+                _logger.LogInformation("Sending message from user {SenderId} in conversation {ConversationId}", dto.SenderId, dto.ConversationId);
+                
+                var command = new SendMessageCommand
+                {
+                    ConversationId = dto.ConversationId,
+                    SenderId = dto.SenderId,
+                    Content = dto.Content,
+                    Attachments = dto.Attachments
+                };
 
-            var result = await _mediator.Send(command);
-            return Ok(result);
+                var result = await _mediator.Send(command);
+                _logger.LogInformation("Message sent successfully: {MessageId}", result.MessageId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending message from user {SenderId}", dto.SenderId);
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         // GET: api/message/conversation/{conversationId}
@@ -47,16 +60,27 @@ namespace PeerPayBackend.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 50)
         {
-            var query = new GetConversationMessagesQuery
+            try
             {
-                ConversationId = conversationId,
-                UserId = userId,
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
+                _logger.LogInformation("Retrieving messages for conversation {ConversationId}, user {UserId}", conversationId, userId);
+                
+                var query = new GetConversationMessagesQuery
+                {
+                    ConversationId = conversationId,
+                    UserId = userId,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
 
-            var result = await _mediator.Send(query);
-            return Ok(result);
+                var result = await _mediator.Send(query);
+                _logger.LogInformation("Retrieved {Count} messages for conversation {ConversationId}", result.TotalCount, conversationId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving messages for conversation {ConversationId}", conversationId);
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         // GET: api/message/unread/{userId}
@@ -124,25 +148,40 @@ namespace PeerPayBackend.Controllers
     public class ConversationController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<ConversationController> _logger;
 
-        public ConversationController(IMediator mediator)
+        public ConversationController(IMediator mediator, ILogger<ConversationController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         // POST: api/conversation
         [HttpPost]
         public async Task<IActionResult> CreateConversation([FromBody] CreateConversationDto dto)
         {
-            var command = new CreateConversationCommand
+            try
             {
-                Participant1Id = dto.Participant1Id,
-                Participant2Id = dto.Participant2Id,
-                JobId = dto.JobId
-            };
+                _logger.LogInformation("Creating conversation between {Participant1Id} and {Participant2Id} for job {JobId}", 
+                    dto.Participant1Id, dto.Participant2Id, dto.JobId);
+                
+                var command = new CreateConversationCommand
+                {
+                    Participant1Id = dto.Participant1Id,
+                    Participant2Id = dto.Participant2Id,
+                    JobId = dto.JobId
+                };
 
-            var result = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetConversationById), new { id = result.ConversationId }, result);
+                var result = await _mediator.Send(command);
+                _logger.LogInformation("Conversation created successfully: {ConversationId}", result.ConversationId);
+                return CreatedAtAction(nameof(GetConversationById), new { id = result.ConversationId }, result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating conversation between {Participant1Id} and {Participant2Id}", 
+                    dto.Participant1Id, dto.Participant2Id);
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         // GET: api/conversation/{id}
@@ -164,9 +203,19 @@ namespace PeerPayBackend.Controllers
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetUserConversations(string userId)
         {
-            var query = new GetUserConversationsQuery { UserId = userId };
-            var result = await _mediator.Send(query);
-            return Ok(result);
+            try
+            {
+                _logger.LogInformation("Retrieving conversations for user {UserId}", userId);
+                var query = new GetUserConversationsQuery { UserId = userId };
+                var result = await _mediator.Send(query);
+                _logger.LogInformation("Retrieved {Count} conversations for user {UserId}", result.Count(), userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving conversations for user {UserId}", userId);
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }

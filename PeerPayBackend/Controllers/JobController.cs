@@ -11,10 +11,12 @@ namespace PeerPayBackend.Controllers
     public class JobController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<JobController> _logger;
 
-        public JobController(IMediator mediator)
+        public JobController(IMediator mediator, ILogger<JobController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -25,11 +27,14 @@ namespace PeerPayBackend.Controllers
         {
             try
             {
+                _logger.LogInformation("Creating job: {Title} for employer: {EmployerId}", command.Title, command.EmployerId);
                 var result = await _mediator.Send(command);
+                _logger.LogInformation("Job created successfully: {JobId}", result.JobId);
                 return CreatedAtAction(nameof(GetJobById), new { id = result.JobId }, result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error creating job: {Title}", command.Title);
                 return BadRequest(new { error = ex.Message });
             }
         }

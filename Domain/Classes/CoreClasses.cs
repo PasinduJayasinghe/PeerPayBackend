@@ -119,7 +119,7 @@ namespace Domain.Classes
     {
         public string JobId { get; set; }
         public string EmployerId { get; set; }
-        public string CategoryId { get; set; }
+        public string? CategoryId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public decimal PayAmount { get; set; }
@@ -136,7 +136,7 @@ namespace Domain.Classes
 
         // Navigation properties
         public Employer Employer { get; set; }
-        public JobCategory Category { get; set; }
+        public JobCategory? Category { get; set; }
         public ICollection<JobApplication> Applications { get; set; }
         public Payment Payment { get; set; }
         public ICollection<Rating> Ratings { get; set; }

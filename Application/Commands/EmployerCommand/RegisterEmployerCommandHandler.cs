@@ -4,6 +4,7 @@ using Domain.Classes;
 using Domain.Enums;
 using Domain.Events;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,30 +19,37 @@ namespace Application.Commands.EmployerCommand
         private readonly IEmployerRepository _employerRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IMediator _mediator;
+        private readonly ILogger<RegisterEmployerCommandHandler> _logger;
 
         public RegisterEmployerCommandHandler(
             IUserRepository userRepository,
             IEmployerRepository employerRepository,
             IPasswordHasher passwordHasher,
-            IMediator mediator)
+            IMediator mediator,
+            ILogger<RegisterEmployerCommandHandler> logger)
         {
             _userRepository = userRepository;
             _employerRepository = employerRepository;
             _passwordHasher = passwordHasher;
             _mediator = mediator;
+            _logger = logger;
         }
 
         public async Task<UserResponseDto> Handle(RegisterEmployerCommand request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Processing employer registration for email: {Email}", request.Email);
+            
             // Check if email already exists
             if (await _userRepository.EmailExistsAsync(request.Email))
             {
+                _logger.LogWarning("Registration failed: Email {Email} already exists", request.Email);
                 throw new Exception("Email already exists");
             }
 
             // Check if phone already exists
             if (await _userRepository.PhoneExistsAsync(request.Phone))
             {
+                _logger.LogWarning("Registration failed: Phone {Phone} already exists", request.Phone);
                 throw new Exception("Phone number already exists");
             }
 

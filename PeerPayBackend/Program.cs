@@ -4,6 +4,9 @@ using Infrastructure.Context;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using PeerPayBackend.Middleware;
+using Serilog;
+using Microsoft.Extensions.Configuration;
 
 namespace PeerPayBackend
 {
@@ -11,7 +14,21 @@ namespace PeerPayBackend
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            // Configure Serilog
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json")
+                    .Build())
+                .CreateLogger();
+
+            try
+            {
+                Log.Information("Starting PeerPay Backend API");
+
+                var builder = WebApplication.CreateBuilder(args);
+
+                // Use Serilog for logging
+                builder.Host.UseSerilog();
 
             // Add services to the container.
 
@@ -40,7 +57,11 @@ namespace PeerPayBackend
             builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
             builder.Services.AddScoped<IStripeService, StripeService>();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+                });
             
             // Add CORS
             builder.Services.AddCors(options =>
@@ -48,7 +69,7 @@ namespace PeerPayBackend
                 options.AddPolicy("AllowLocalhost",
                     policy =>
                     {
-                        policy.WithOrigins("http://localhost:5173", "http://localhost:5175")
+                        policy.WithOrigins("http://localhost:5173","http://localhost:5174","http://localhost:5175", "http://localhost:5176")
                               .AllowAnyHeader()
                               .AllowAnyMethod()
                               .AllowCredentials();
@@ -62,6 +83,10 @@ namespace PeerPayBackend
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
+            
+            // Use global exception handling middleware
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -70,15 +95,28 @@ namespace PeerPayBackend
 
             app.UseHttpsRedirection();
 
+            // Use Serilog request logging
+            app.UseSerilogRequestLogging();
+
             // Use CORS
             app.UseCors("AllowLocalhost");
 
             app.UseAuthorization();
 
-
             app.MapControllers();
 
+            Log.Information("PeerPay Backend API started successfully");
             app.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Application failed to start");
+                throw;
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
     }
 }
